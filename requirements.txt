@@ -1,0 +1,17 @@
+# Generate/update this file with installed packages:
+# pip freeze > requirements.txt
+#
+# Optional (imports-based, smaller list):
+# pip install pipreqs
+# pipreqs . --force
+
+beautifulsoup4
+flask
+flask-cors
+groq
+langchain-text-splitters
+pinecone
+python-dotenv
+requests
+scikit-learn
+sentence-transformers
