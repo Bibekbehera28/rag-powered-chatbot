@@ -68,29 +68,14 @@ html {
 .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: var(--text-primary);
 }
 
-.logo svg {
-    color: var(--accent);
-}
-
-.logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.15;
-}
-
-.logo-text span {
-    font-weight: 650;
-    font-size: 15px;
-}
-
-.logo-text small {
-    color: var(--text-muted);
-    font-size: 12px;
-    letter-spacing: 0.02em;
+.brand-logo {
+    display: block;
+    height: 40px;
+    width: auto;
+    max-width: min(220px, 52vw);
+    object-fit: contain;
 }
 
 .new-chat-btn {
@@ -534,10 +519,6 @@ html {
         padding: 10px 12px;
     }
 
-    .logo-text small {
-        display: none;
-    }
-
     .new-chat-btn {
         padding: 7px 10px;
         font-size: 12px;
@@ -626,13 +607,9 @@ html {
         padding: 8px 10px;
     }
 
-    .logo svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .logo-text span {
-        font-size: 13px;
+    .brand-logo {
+        height: 32px;
+        max-width: min(180px, 48vw);
     }
 
     .new-chat-btn {

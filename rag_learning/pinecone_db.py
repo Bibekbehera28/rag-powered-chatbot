@@ -2,29 +2,20 @@ import os
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 
-# -------------------------------
 # LOAD ENV VARIABLES
-# -------------------------------
 
 load_dotenv()
 
-# -------------------------------
 # LOAD API KEY
-# -------------------------------
 
 api_key = os.getenv("PINECONE_API_KEY")
 
-# -------------------------------
 # INITIALIZE PINECONE
-# -------------------------------
 
 pc = Pinecone(api_key=api_key)
-
 INDEX_NAME = "vsoft-rag"
 
-# -------------------------------
 # CREATE INDEX IF NOT EXISTS
-# -------------------------------
 
 if INDEX_NAME not in pc.list_indexes().names():
 
@@ -38,8 +29,5 @@ if INDEX_NAME not in pc.list_indexes().names():
         )
     )
 
-# -------------------------------
 # CONNECT TO INDEX
-# -------------------------------
-
 index = pc.Index(INDEX_NAME)
