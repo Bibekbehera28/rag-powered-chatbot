@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,19 +20,13 @@
                 <div class="header-content">
 
                     <div class="logo">
-                        <img
-                            src="assets/VSoft-Logo.webp"
-                            alt="VSoft"
-                            class="brand-logo"
-                            width="180"
-                            height="48"
-                        >
+                        <img src="assets/VSoft-Logo.webp" alt="VSoft" class="brand-logo" width="180" height="48">
                     </div>
 
                     <button class="new-chat-btn" onclick="clearChat()">
 
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
 
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -52,8 +48,8 @@
 
                     <div class="welcome-icon">
 
-                        <svg width="48" height="48" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
 
                             <circle cx="12" cy="12" r="10"></circle>
 
@@ -83,22 +79,14 @@
 
                 <div class="input-wrapper">
 
-                    <textarea
-                        id="messageInput"
-                        placeholder="Message AI Assistant..."
-                        rows="1"
-                        autocomplete="off"
-                        autocorrect="off"
-                        autocapitalize="off"
-                        spellcheck="false"
-                        onkeydown="handleKeyDown(event)"
-                        oninput="autoResize(this)"
-                    ></textarea>
+                    <textarea id="messageInput" placeholder="Message AI Assistant..." rows="1" autocomplete="off"
+                        autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"></textarea>
 
                     <button class="send-btn" id="sendBtn" onclick="sendMessage()">
 
-                        <svg width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
 
                             <line x1="22" y1="2" x2="11" y2="13"></line>
 
@@ -123,4 +111,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
