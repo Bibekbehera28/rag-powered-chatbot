@@ -45,7 +45,7 @@ chat_history = []
 # -------------------------------
 
 # Initial Pinecone retrieval
-INITIAL_RETRIEVAL_COUNT = 20
+INITIAL_RETRIEVAL_COUNT = 5
 
 # Final chunks after reranking
 FINAL_TOP_K = 5
