@@ -430,13 +430,134 @@ html {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Voice recording: subtle emphasis on the composer (ChatGPT-style) */
+.input-wrapper--voice-active {
+    border-color: rgba(16, 163, 127, 0.45);
+    box-shadow: 0 0 0 1px rgba(16, 163, 127, 0.12);
+}
+
 .input-wrapper:focus-within {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.15);
 }
 
+.input-wrapper--voice-active:focus-within {
+    border-color: rgba(16, 163, 127, 0.55);
+    box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.18);
+}
+
+.input-field-wrap {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+
+/* Wave overlay sits on top of the textarea while recording */
+.voice-wave-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 4px 4px 0;
+    pointer-events: none;
+    z-index: 2;
+    background: #171717;
+    border-radius: 6px;
+}
+
+.voice-wave-overlay[hidden] {
+    display: none !important;
+}
+
+.voice-wave-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.voice-wave-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    height: 34px;
+    flex: 1;
+    min-width: 0;
+    max-width: 240px;
+    margin: 0 auto;
+}
+
+.voice-bar {
+    width: 3px;
+    min-height: 4px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #34d399, var(--accent));
+    opacity: 0.9;
+    flex-shrink: 0;
+    transition: height 0.05s ease-out;
+}
+
+/* Subtle motion if Web Audio meter is unavailable */
+.voice-wave-bars--fallback .voice-bar {
+    animation: voiceBarPulse 0.55s ease-in-out infinite alternate;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(2) {
+    animation-delay: 0.07s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(3) {
+    animation-delay: 0.14s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(4) {
+    animation-delay: 0.21s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(5) {
+    animation-delay: 0.1s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(6) {
+    animation-delay: 0.18s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(7) {
+    animation-delay: 0.04s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(8) {
+    animation-delay: 0.12s;
+}
+
+.voice-wave-bars--fallback .voice-bar:nth-child(9) {
+    animation-delay: 0.2s;
+}
+
+@keyframes voiceBarPulse {
+    0% {
+        height: 5px;
+        opacity: 0.55;
+    }
+    100% {
+        height: 26px;
+        opacity: 1;
+    }
+}
+
 #messageInput {
     flex: 1;
+    width: 100%;
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -448,8 +569,68 @@ html {
     font-family: inherit;
 }
 
+.input-wrapper--voice-active #messageInput {
+    opacity: 0;
+    caret-color: transparent;
+}
+
 #messageInput::placeholder {
     color: var(--text-muted);
+}
+
+/* Mic + send grouped like ChatGPT (voice control beside send) */
+.input-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.mic-btn {
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.mic-btn:hover:not(:disabled) {
+    background-color: var(--bg-hover);
+    border-color: #4c4c4c;
+}
+
+.mic-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Voice: actively capturing from the microphone */
+.mic-btn.recording {
+    border-color: rgba(239, 68, 68, 0.65);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    animation: micPulse 1.25s ease-in-out infinite;
+}
+
+/* Voice: upload + transcription + assistant generation in flight */
+.mic-btn.processing {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+@keyframes micPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35);
+    }
 }
 
 .send-btn {
@@ -587,7 +768,8 @@ html {
         font-size: 0.9rem;
     }
 
-    .send-btn {
+    .send-btn,
+    .mic-btn {
         width: 36px;
         height: 36px;
     }
@@ -681,13 +863,15 @@ html {
         line-height: 1.45;
     }
 
-    .send-btn {
+    .send-btn,
+    .mic-btn {
         width: 34px;
         height: 34px;
         border-radius: 9px;
     }
 
-    .send-btn svg {
+    .send-btn svg,
+    .mic-btn svg {
         width: 16px;
         height: 16px;
     }

@@ -77,24 +77,78 @@
             <!-- Input -->
             <footer class="input-container">
 
-                <div class="input-wrapper">
+                <div class="input-wrapper" id="inputWrapper">
 
-                    <textarea id="messageInput" placeholder="Message AI Assistant..." rows="1" autocomplete="off"
-                        autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="handleKeyDown(event)"
-                        oninput="autoResize(this)"></textarea>
+                    <div class="input-field-wrap">
 
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <textarea id="messageInput" placeholder="Message AI Assistant..." rows="1" autocomplete="off"
+                            autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="handleKeyDown(event)"
+                            oninput="autoResize(this)"></textarea>
 
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
+                        <div id="voiceWaveOverlay" class="voice-wave-overlay" hidden aria-hidden="true">
 
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <span class="voice-wave-label">Listening…</span>
 
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            <div class="voice-wave-bars" role="presentation">
 
-                        </svg>
+                                <span class="voice-bar"></span>
 
-                    </button>
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                                <span class="voice-bar"></span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-actions">
+
+                        <button class="mic-btn" id="micBtn" type="button" aria-pressed="false"
+                            aria-label="Voice input" title="Voice input" onclick="toggleVoiceInput()">
+
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+
+                                <line x1="12" y1="19" x2="12" y2="23"></line>
+
+                                <line x1="8" y1="23" x2="16" y2="23"></line>
+
+                            </svg>
+
+                        </button>
+
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+
+                            </svg>
+
+                        </button>
+
+                    </div>
 
                 </div>
 
