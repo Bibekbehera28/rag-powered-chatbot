@@ -9,11 +9,15 @@ beautifulsoup4
 flask
 flask-cors
 groq
+gunicorn
+langchain==0.3.25
+langchain-community==0.3.24
 langchain-text-splitters
 pinecone
 python-dotenv
 requests
 scikit-learn
 sentence-transformers
-gunicorn
+torch
+transformers
 
