@@ -16,7 +16,7 @@ const CLEAR_URL = `${API_BASE}/clear`;
 
 const STORAGE_KEY = 'vsoft_rag_chats_v2';
 const LEGACY_STORAGE_KEY = 'vsoft_rag_chats_v1';
-const RECENTS_PANEL_OPEN_KEY = 'vsoft_recents_panel_open';
+const SIDEBAR_EXPANDED_KEY = 'vsoft_sidebar_expanded';
 
 const VOICE_SILENCE_MS = 2600;
 const VOICE_MIN_RECORD_MS = 520;
@@ -39,11 +39,13 @@ const voiceWaveLabel = document.getElementById('voiceWaveLabel');
 const sidebarEl = document.getElementById('sidebar');
 const sidebarBackdrop = document.getElementById('sidebarBackdrop');
 const sidebarOpenBtn = document.getElementById('sidebarOpenBtn');
+const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
 const sidebarNewChatBtn = document.getElementById('sidebarNewChatBtn');
 const sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
-const sidebarRecentsToggleBtn = document.getElementById('sidebarRecentsToggleBtn');
-const sidebarRecentsPanel = document.getElementById('sidebarRecentsPanel');
+const sidebarRecentsBtn = document.getElementById('sidebarRecentsBtn');
+const sidebarSearchPanel = document.getElementById('sidebarSearchPanel');
 const chatSearchInput = document.getElementById('chatSearchInput');
+const sidebarSearchResults = document.getElementById('sidebarSearchResults');
 const chatHistoryList = document.getElementById('chatHistoryList');
 
 /* ----------------------------------------------------------------------------- */
@@ -60,6 +62,7 @@ let currentMessages = [];
 
 /** Client-side filter for sidebar search */
 let chatSearchQuery = '';
+let isSearchPanelOpen = false;
 
 /* ----------------------------------------------------------------------------- */
 /* Voice capture (persistent stream; silence ends clip) */
@@ -228,79 +231,184 @@ function getFilteredConversations() {
     return conversations.filter((c) => (c.title || '').toLowerCase().includes(q));
 }
 
-function renderChatList() {
-    if (!chatHistoryList) return;
-    chatHistoryList.innerHTML = '';
-    const frag = document.createDocumentFragment();
-    const list = getFilteredConversations();
+function getChatDisplayTitle(chat) {
+    const firstUserMsg = chat.messages.find((m) => m.role === 'user');
+    return firstUserMsg
+        ? titleFromFirstUserMessage(firstUserMsg.content)
+        : (chat.title || 'Chat');
+}
 
-    if (!list.length && chatSearchQuery.trim()) {
-        const empty = document.createElement('div');
-        empty.className = 'sidebar-chat-empty';
-        empty.textContent = 'No chats match your search.';
-        frag.appendChild(empty);
-        chatHistoryList.appendChild(frag);
-        return;
-    }
+function createChatListRow(chat) {
+    const row = document.createElement('div');
+    row.className = 'sidebar-chat-item';
+    if (chat.id === activeChatId) row.classList.add('is-active');
+    row.dataset.chatId = chat.id;
 
-    list.forEach((chat) => {
-        const row = document.createElement('div');
-        row.className = 'sidebar-chat-item';
-        if (chat.id === activeChatId) row.classList.add('is-active');
-        row.dataset.chatId = chat.id;
+    const body = document.createElement('button');
+    body.type = 'button';
+    body.className = 'sidebar-chat-item-body';
+    body.setAttribute('aria-current', chat.id === activeChatId ? 'true' : 'false');
 
-        const body = document.createElement('button');
-        body.type = 'button';
-        body.className = 'sidebar-chat-item-body';
-        body.setAttribute('aria-current', chat.id === activeChatId ? 'true' : 'false');
+    const title = document.createElement('div');
+    title.className = 'sidebar-chat-item-title';
+    title.textContent = getChatDisplayTitle(chat);
+    body.appendChild(title);
 
-        const title = document.createElement('div');
-        title.className = 'sidebar-chat-item-title';
-        const firstUserMsg = chat.messages.find((m) => m.role === 'user');
-        title.textContent = firstUserMsg
-            ? titleFromFirstUserMessage(firstUserMsg.content)
-            : (chat.title || 'Chat');
-
-        body.appendChild(title);
-
-        const del = document.createElement('button');
-        del.type = 'button';
-        del.className = 'sidebar-chat-delete';
-        del.setAttribute('aria-label', 'Delete chat');
-        del.title = 'Delete';
-        del.innerHTML =
-            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
-
-        del.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteConversation(chat.id);
-        });
-
-        body.addEventListener('click', () => {
-            switchConversation(chat.id);
-        });
-
-        row.appendChild(body);
-        row.appendChild(del);
-        frag.appendChild(row);
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'sidebar-chat-delete';
+    del.setAttribute('aria-label', 'Delete chat');
+    del.title = 'Delete';
+    del.innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+    del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteConversation(chat.id);
+    });
+    body.addEventListener('click', () => {
+        switchConversation(chat.id);
     });
 
-    chatHistoryList.appendChild(frag);
+    row.appendChild(body);
+    row.appendChild(del);
+    return row;
+}
+
+function renderListInto(container, list, emptyMessage) {
+    if (!container) return;
+    container.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    if (!list.length && emptyMessage) {
+        const empty = document.createElement('div');
+        empty.className = 'sidebar-chat-empty';
+        empty.textContent = emptyMessage;
+        frag.appendChild(empty);
+        container.appendChild(frag);
+        return;
+    }
+    list.forEach((chat) => frag.appendChild(createChatListRow(chat)));
+    container.appendChild(frag);
+}
+
+function renderSearchResults() {
+    if (!sidebarSearchResults) return;
+    if (!isSearchPanelOpen) {
+        sidebarSearchResults.innerHTML = '';
+        return;
+    }
+    const q = chatSearchQuery.trim();
+    renderListInto(
+        sidebarSearchResults,
+        getFilteredConversations(),
+        q ? 'No chats match your search.' : null,
+    );
+}
+
+function setSearchPanelOpen(open) {
+    isSearchPanelOpen = open;
+    if (!sidebarSearchPanel) return;
+    sidebarSearchPanel.classList.toggle('sidebar-search-panel--open', open);
+    sidebarSearchPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    sidebarSearchBtn?.classList.toggle('is-active', open);
+    sidebarSearchBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) {
+        if (chatSearchInput) chatSearchInput.value = '';
+        chatSearchQuery = '';
+        chatSearchInput?.blur();
+    }
+    renderSearchResults();
+}
+
+function renderChatList() {
+    renderListInto(chatHistoryList, conversations, null);
+    renderSearchResults();
 }
 
 function isMobileSidebarLayout() {
     return globalThis.matchMedia && globalThis.matchMedia('(max-width: 900px)').matches;
 }
 
+function isSidebarExpanded() {
+    return !sidebarEl?.classList.contains('sidebar--collapsed');
+}
+
+function updateSidebarToggleAria() {
+    if (!sidebarToggleBtn) return;
+    const expanded = isSidebarExpanded();
+    sidebarToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    sidebarToggleBtn.setAttribute('aria-label', expanded ? 'Close sidebar' : 'Open sidebar');
+    sidebarToggleBtn.title = expanded ? 'Close sidebar' : 'Open sidebar';
+}
+
+function setSidebarExpanded(expanded, persist = true) {
+    if (!sidebarEl) return;
+    if (isMobileSidebarLayout()) {
+        sidebarEl.classList.remove('sidebar--collapsed');
+        if (expanded) {
+            openMobileSidebar();
+        } else {
+            closeMobileSidebar();
+        }
+        updateSidebarToggleAria();
+        return;
+    }
+    sidebarEl.classList.toggle('sidebar--collapsed', !expanded);
+    if (persist) {
+        localStorage.setItem(SIDEBAR_EXPANDED_KEY, expanded ? '1' : '0');
+    }
+    updateSidebarToggleAria();
+}
+
+function toggleSidebarExpanded() {
+    if (isMobileSidebarLayout()) {
+        if (sidebarEl?.classList.contains('sidebar--open')) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+        return;
+    }
+    setSidebarExpanded(!isSidebarExpanded());
+    if (!isSidebarExpanded()) {
+        setSearchPanelOpen(false);
+    }
+}
+
+function expandSidebarForAction(openSearch = false) {
+    if (isMobileSidebarLayout()) {
+        openMobileSidebar();
+    } else {
+        setSidebarExpanded(true);
+    }
+    if (openSearch) {
+        setSearchPanelOpen(true);
+        requestAnimationFrame(() => {
+            chatSearchInput?.focus();
+            chatSearchInput?.select();
+        });
+    }
+}
+
+function applySavedSidebarState() {
+    if (!sidebarEl) return;
+    if (isMobileSidebarLayout()) {
+        sidebarEl.classList.remove('sidebar--collapsed');
+        updateSidebarToggleAria();
+        return;
+    }
+    const saved = localStorage.getItem(SIDEBAR_EXPANDED_KEY);
+    const expanded = saved === null ? true : saved === '1';
+    setSidebarExpanded(expanded, false);
+}
+
 function openMobileSidebar() {
     if (!sidebarEl || !sidebarBackdrop) return;
     sidebarEl.classList.add('sidebar--open');
+    sidebarEl.classList.remove('sidebar--collapsed');
     sidebarBackdrop.hidden = false;
     sidebarBackdrop.classList.add('is-visible');
     sidebarOpenBtn?.setAttribute('aria-expanded', 'true');
-    if (isMobileSidebarLayout()) {
-        setRecentsPanelOpen(true);
-    }
+    updateSidebarToggleAria();
 }
 
 function closeMobileSidebar() {
@@ -309,34 +417,8 @@ function closeMobileSidebar() {
     sidebarBackdrop.classList.remove('is-visible');
     sidebarBackdrop.hidden = true;
     sidebarOpenBtn?.setAttribute('aria-expanded', 'false');
-}
-
-function setRecentsPanelOpen(open) {
-    if (!sidebarEl) return;
-    sidebarEl.classList.toggle('sidebar--recents-open', open);
-    sidebarRecentsToggleBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
-    localStorage.setItem(RECENTS_PANEL_OPEN_KEY, open ? '1' : '0');
-}
-
-function toggleRecentsPanel() {
-    const open = !sidebarEl?.classList.contains('sidebar--recents-open');
-    setRecentsPanelOpen(open);
-    if (!open) {
-        chatSearchInput?.blur();
-    }
-}
-
-function openRecentsPanelForSearch() {
-    setRecentsPanelOpen(true);
-    requestAnimationFrame(() => {
-        chatSearchInput?.focus();
-        chatSearchInput?.select();
-    });
-}
-
-function applySavedRecentsPanelState() {
-    if (!sidebarEl || isMobileSidebarLayout()) return;
-    setRecentsPanelOpen(localStorage.getItem(RECENTS_PANEL_OPEN_KEY) === '1');
+    setSearchPanelOpen(false);
+    updateSidebarToggleAria();
 }
 
 function switchConversation(chatId) {
@@ -344,6 +426,7 @@ function switchConversation(chatId) {
         closeMobileSidebar();
         return;
     }
+    setSearchPanelOpen(false);
     persistActiveConversation();
     abortVoiceWithoutUpload();
 
@@ -387,10 +470,7 @@ async function startNewChat() {
     activeChatId = null;
     currentMessages = [];
 
-    if (chatSearchInput) {
-        chatSearchInput.value = '';
-    }
-    chatSearchQuery = '';
+    setSearchPanelOpen(false);
 
     messagesDiv.innerHTML = '';
     welcomeMessage.classList.remove('hidden');
@@ -1183,25 +1263,30 @@ function wireEvents() {
         void startNewChat();
     });
 
-    sidebarRecentsToggleBtn?.addEventListener('click', () => {
-        toggleRecentsPanel();
+    sidebarRecentsBtn?.addEventListener('click', () => {
+        expandSidebarForAction(false);
     });
 
     sidebarSearchBtn?.addEventListener('click', () => {
-        openRecentsPanelForSearch();
+        if (isSearchPanelOpen && isSidebarExpanded()) {
+            setSearchPanelOpen(false);
+            return;
+        }
+        expandSidebarForAction(true);
+    });
+
+    sidebarToggleBtn?.addEventListener('click', () => {
+        toggleSidebarExpanded();
     });
 
     chatSearchInput?.addEventListener('input', () => {
         chatSearchQuery = chatSearchInput.value;
-        renderChatList();
+        renderSearchResults();
     });
 
     chatSearchInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            chatSearchInput.value = '';
-            chatSearchQuery = '';
-            renderChatList();
-            chatSearchInput.blur();
+            setSearchPanelOpen(false);
         }
     });
 
@@ -1216,10 +1301,10 @@ function wireEvents() {
     globalThis.addEventListener('resize', () => {
         if (!isMobileSidebarLayout()) {
             closeMobileSidebar();
-            applySavedRecentsPanelState();
+            applySavedSidebarState();
         } else if (sidebarEl) {
-            sidebarEl.classList.remove('sidebar--recents-open');
-            sidebarRecentsToggleBtn?.setAttribute('aria-expanded', 'false');
+            sidebarEl.classList.remove('sidebar--collapsed');
+            updateSidebarToggleAria();
         }
     });
 }
@@ -1229,7 +1314,7 @@ function bootstrap() {
     rebuildMessagesDomFromState();
     renderChatList();
     saveSession();
-    applySavedRecentsPanelState();
+    applySavedSidebarState();
     wireEvents();
     messageInput.focus();
 }
