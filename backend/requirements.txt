@@ -5,6 +5,11 @@
 # pip install pipreqs
 # pipreqs . --force
 
+
+# to install requirements
+# pip install -r requirements.txt
+
+
 beautifulsoup4
 flask
 flask-cors

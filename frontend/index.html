@@ -13,152 +13,138 @@
 <body>
 
     <div class="app-shell">
-        <div class="chat-container">
-            <!-- Header -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
+
+        <aside class="sidebar" id="sidebar" aria-label="Conversations">
+            <div class="sidebar-rail" role="toolbar" aria-label="Sidebar tools">
+                <button type="button" class="sidebar-icon-btn" id="sidebarNewChatBtn" title="New chat"
+                    aria-label="New chat">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                </button>
+                <button type="button" class="sidebar-icon-btn" id="sidebarSearchBtn" title="Search chats"
+                    aria-label="Search chats">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+                <button type="button" class="sidebar-icon-btn" id="sidebarRecentsToggleBtn" title="Recent chats"
+                    aria-label="Recent chats" aria-expanded="false" aria-controls="sidebarRecentsPanel">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-panel" id="sidebarRecentsPanel" aria-label="Recent chats panel">
+                <div class="sidebar-panel-inner">
+                    <div class="sidebar-search-row">
+                        <label class="visually-hidden" for="chatSearchInput">Search chats</label>
+                        <input type="search" id="chatSearchInput" class="sidebar-search-input" placeholder="Search chats…"
+                            autocomplete="off" spellcheck="false">
+                    </div>
+                    <nav class="sidebar-chat-list" id="chatHistoryList" aria-label="Recent chats"></nav>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-column">
             <header class="chat-header">
-
                 <div class="header-content">
-
-                    <div class="logo">
-                        <img src="assets/VSoft-Logo.webp" alt="VSoft" class="brand-logo" width="180" height="48">
-                    </div>
-
-                    <button class="new-chat-btn" onclick="clearChat()">
-
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-
-                        </svg>
-
-                        New Chat
-
-                    </button>
-
-                </div>
-
-            </header>
-
-            <!-- Messages -->
-            <main class="messages-container" id="messagesContainer">
-
-                <div class="welcome-message" id="welcomeMessage">
-
-                    <div class="welcome-icon">
-
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5">
-
-                            <circle cx="12" cy="12" r="10"></circle>
-
-                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-
-                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
-
-                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
-
-                        </svg>
-
-                    </div>
-
-                    <h1>How can I help you today?</h1>
-
-                    <p>Ask me anything. I can help with coding, debugging, and explanations.</p>
-
-                </div>
-
-                <!-- Messages -->
-                <div class="messages" id="messages" aria-live="polite"></div>
-
-            </main>
-
-            <!-- Input -->
-            <footer class="input-container">
-
-                <div class="input-wrapper" id="inputWrapper">
-
-                    <div class="input-field-wrap">
-
-                        <textarea id="messageInput" placeholder="Message AI Assistant..." rows="1" autocomplete="off"
-                            autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="handleKeyDown(event)"
-                            oninput="autoResize(this)"></textarea>
-
-                        <div id="voiceWaveOverlay" class="voice-wave-overlay" hidden aria-hidden="true">
-
-                            <span class="voice-wave-label">Listening…</span>
-
-                            <div class="voice-wave-bars" role="presentation">
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                                <span class="voice-bar"></span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="input-actions">
-
-                        <button class="mic-btn" id="micBtn" type="button" aria-pressed="false"
-                            aria-label="Voice input" title="Voice input" onclick="toggleVoiceInput()">
-
+                    <div class="header-left">
+                        <button type="button" class="sidebar-toggle-mobile" id="sidebarOpenBtn" aria-controls="sidebar"
+                            aria-expanded="false" title="Open sidebar">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" aria-hidden="true">
-
-                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-
-                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-
-                                <line x1="12" y1="19" x2="12" y2="23"></line>
-
-                                <line x1="8" y1="23" x2="16" y2="23"></line>
-
+                                <line x1="4" y1="6" x2="20" y2="6"></line>
+                                <line x1="4" y1="12" x2="20" y2="12"></line>
+                                <line x1="4" y1="18" x2="20" y2="18"></line>
                             </svg>
-
                         </button>
+                        <div class="logo">
+                            <img src="assets/VSoft-Logo.webp" alt="VSoft" class="brand-logo" width="180" height="48">
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-
+            <main class="messages-container" id="messagesContainer">
+                <div class="messages-inner">
+                    <div class="welcome-message" id="welcomeMessage">
+                        <div class="welcome-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
                             </svg>
-
-                        </button>
-
+                        </div>
+                        <h1>How can I help you today?</h1>
+                        <p>Ask me anything. I can help with coding, debugging, and explanations.</p>
                     </div>
 
+                    <div class="messages" id="messages" aria-live="polite"></div>
                 </div>
+            </main>
 
-                <p class="disclaimer">
-                    AI can make mistakes. Verify important output.
-                </p>
+            <footer class="input-container">
+                <div class="input-inner">
+                    <div class="input-wrapper" id="inputWrapper">
+                        <div class="input-field-wrap">
+                            <textarea id="messageInput" placeholder="Message AI Assistant..." rows="1"
+                                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 
+                            <div id="voiceWaveOverlay" class="voice-wave-overlay" hidden aria-hidden="true">
+                                <span class="voice-wave-label" id="voiceWaveLabel">Listening…</span>
+                                <div class="voice-wave-bars" role="presentation">
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                    <span class="voice-bar"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-actions">
+                            <button class="mic-btn" id="micBtn" type="button" aria-pressed="false"
+                                aria-label="Voice input" title="Voice input">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+
+                            <button class="send-btn" id="sendBtn" type="button">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="disclaimer">
+                        AI can make mistakes. Verify important output.
+                    </p>
+                </div>
             </footer>
         </div>
-
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
